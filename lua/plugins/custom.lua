@@ -37,12 +37,17 @@ local plugins = {
    "williamboman/mason.nvim",
    opts = {
       ensure_installed = {
+        "prettierd",
+        "typescript-language-server",
+        "tailwindcss-language-server",
         "lua-language-server",
+        "eslint-lsp",
         "html-lsp",
         "prettier",
         "gopls",
         "gofumpt",
         "goimports",
+        "templ",
         "stylua"
       },
     },
@@ -85,15 +90,18 @@ local plugins = {
       return require "configs.null-ls"
     end,
   },
+  {"nvimtools/none-ls.nvim"},
   {
     "olexsmir/gopher.nvim",
     ft = "go",
-    config = function(_, opts)
-      require("gopher").setup(opts)
-    end,
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
+    },
     build = function()
-      vim.cmd [[silent! GoInstallDeps]]
+      vim.cmd([[silent! GoInstallDeps]])
     end,
+    opts = {},
   },
   {
     "rcarriga/nvim-dap-ui",
@@ -118,8 +126,58 @@ local plugins = {
       })
     end,
     lazy=false
-  }
+  },
+  {
+  "coder/claudecode.nvim",
+  dependencies = { "folke/snacks.nvim" },
+    lazy=false,
+  config = true,
+},
+  {
+    "nvim-treesitter/nvim-treesitter-context",
+    lazy = false,
+    config = function()
+      require("treesitter-context").setup({
+        enable = true,
+        max_lines = 0, -- No limit on the number of lines
+        trim_scope = "outer", -- Show context for outer scope
+        min_window_height = 0, -- No minimum window height
+      })
+    end,
+  },
 
+
+  {
+    'isakbm/gitgraph.nvim',
+    opts = {
+      git_cmd = "git",
+      symbols = {
+        merge_commit = 'M',
+        commit = '*',
+      },
+      format = {
+        timestamp = '%H:%M:%S %d-%m-%Y',
+        fields = { 'hash', 'timestamp', 'author', 'branch_name', 'tag' },
+      },
+      hooks = {
+        on_select_commit = function(commit)
+          print('selected commit:', commit.hash)
+        end,
+        on_select_range_commit = function(from, to)
+          print('selected range:', from.hash, to.hash)
+        end,
+      },
+    },
+    keys = {
+      {
+        "<leader>gl",
+        function()
+          require('gitgraph').draw({}, { all = true, max_count = 5000 })
+        end,
+        desc = "GitGraph - Draw",
+      },
+    },
+  },
 }
 
 return plugins
